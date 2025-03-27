@@ -2,5 +2,4 @@
 .DS_Store
 
 # Environment variables
-.env
 node_modules/
