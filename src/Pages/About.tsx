@@ -1,4 +1,4 @@
-import HeroImg from "@/assets/hero1.png";
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
@@ -27,9 +27,9 @@ const About = () => {
                   </p>
                 </div>
 
-                <div className="z-0 relative w-full max-w-[800px] rounded-xl overflow-hidden shadow-xl">
+                {/* <div className="z-0 relative w-full max-w-[800px] rounded-xl overflow-hidden shadow-xl">
                   <img src={HeroImg} /> <BorderBeam className="z-100" duration={5} size={170} />
-                </div>
+                </div> */}
               </div>
             </div>
           </section>

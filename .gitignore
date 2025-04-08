@@ -4,3 +4,4 @@
 .env
 # Environment variables
 node_modules/
+dist/

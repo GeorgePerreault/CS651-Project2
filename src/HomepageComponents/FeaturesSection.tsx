@@ -2,6 +2,7 @@ import { BentoCard, BentoGrid } from "../components/magicui/bento-grid";
 import { motion } from "framer-motion";
 import { Cloud, ImageIcon, Database, Zap, Shield } from "lucide-react";
 import UserImg from "@/assets/UserImg.jpeg";
+
 interface Feature {
   Icon: React.ElementType;
   name: string;
@@ -72,6 +73,7 @@ const FeatureSection = () => {
           ))}
         </BentoGrid>
       </motion.div>
+      
     </section>
   );
 };

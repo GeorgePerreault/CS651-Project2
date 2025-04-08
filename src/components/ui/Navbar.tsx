@@ -10,7 +10,7 @@ const Navbar = () => {
   return (
     <nav className="bg-transparent bg-opacity-30 backdrop-blur-md fixed top-0 left-0 right-0 border-b flex items-center justify-between px-6 h-16 w-full z-50">
       <Link to="/" className="font-bold text-xl">
-        VisionCloud
+        StoryForge
       </Link>
       <div className="flex space-x-4 items-center">
         <Link to="/about">

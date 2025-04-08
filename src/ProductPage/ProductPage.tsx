@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, WandSparkles } from "lucide-react";
 import axios from "axios";
-import { AnalysisApiResponse } from "@/types/analysis";
 import Navbar from "./NavBar";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
-import { GenreDropdown, SelectedGenre } from "@/components/ui/genreDropdown"; // Make sure to export SelectedGenre type in your GenreDropdown component
+import { GenreDropdown, SelectedGenre } from "@/components/ui/genreDropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPinterest } from "@fortawesome/free-brands-svg-icons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 const ProductPage = () => {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const ProductPage = () => {
     if (e.target.files?.[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -38,7 +37,6 @@ const ProductPage = () => {
     }
   };
 
-  // New reset function for array-based genres
   const resetGenres = () => {
     setSelectedGenres([]);
   };
@@ -46,27 +44,21 @@ const ProductPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !file || !user) return;
-
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("image", file);
       formData.append("userId", user.id);
-
-      // Convert selected genres to format needed for API
       const genresData = selectedGenres.map((genre) => ({
         id: genre.id,
         style: genre.style,
       }));
-
       formData.append("genres", JSON.stringify(genresData));
-
-      const { data } = await axios.post<AnalysisApiResponse>(
+      const { data } = await axios.post(
         "http://localhost:8080/api/artworks",
         formData
       );
-
       navigate("/results", {
         state: {
           analysis: data.analysis,
@@ -83,9 +75,6 @@ const ProductPage = () => {
       setLoading(false);
     }
   };
-
-  // Getting count of selected genres
-  // const selectedGenreCount = selectedGenres.length;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -108,7 +97,6 @@ const ProductPage = () => {
                 and emotions.
               </p>
             </div>
-
             <Card
               className="border-2 shadow-md hover:shadow-xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700"
               style={{ animationDelay: "200ms" }}
@@ -147,13 +135,9 @@ const ProductPage = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
-
                       <div className="space-y-4 animate-in fade-in-50 slide-in-from-bottom-2">
                         <div className="space-y-2">
-                          <Label
-                            htmlFor="title"
-                            className="text-base font-medium"
-                          >
+                          <Label htmlFor="title" className="text-base font-medium">
                             Artwork Title
                           </Label>
                           <Input
@@ -165,10 +149,7 @@ const ProductPage = () => {
                           />
                         </div>
                         <div className="flex items-center space-x-4">
-                          <Label
-                            className="text-base font-medium"
-                            htmlFor="length"
-                          >
+                          <Label className="text-base font-medium" htmlFor="length">
                             Story Length
                           </Label>
                           <RadioGroup className="flex items-center space-x-4">
@@ -178,16 +159,12 @@ const ProductPage = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="long-story" id="r2" />
-                              <Label htmlFor="r3">Long</Label>
+                              <Label htmlFor="r2">Long</Label>
                             </div>
                           </RadioGroup>
                         </div>
-
                         <div className="space-y-2">
-                          <Label
-                            htmlFor="genre"
-                            className="text-base font-medium block"
-                          >
+                          <Label htmlFor="genre" className="text-base font-medium block">
                             Genres
                           </Label>
                           <GenreDropdown
@@ -196,7 +173,6 @@ const ProductPage = () => {
                           />
                         </div>
                       </div>
-
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -239,7 +215,6 @@ const ProductPage = () => {
                 <span className="text-muted-foreground font-medium">OR</span>
                 <div className="h-px bg-border w-16"></div>
               </div>
-
               <div className="flex items-center justify-center">
                 <Button className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 px-4 py-2">
                   <FontAwesomeIcon

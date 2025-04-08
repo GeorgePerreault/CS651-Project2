@@ -79,25 +79,9 @@
   }
 }
 
-.image-container {
-  perspective: 1000px; /* Adds depth to the scene */
- 
-}
 
-.image {
-  transform-style: preserve-3d;
-  transition: transform 0.2s ease; /* Smooth transition when scrolling */
-}
+/* .cl-avatarBox {
 
-.image-tilt {
-  transform: rotate3d(10, 1, 0, -10deg); /* Initial tilted state */
-  transition: transform 0.5s ease;
-}
-
-.image-straight {
-  transform: rotate3d(0, 0, 0, 0deg); 
-  transition: transform 0.9s ease;
-}
-
+} */
 
 

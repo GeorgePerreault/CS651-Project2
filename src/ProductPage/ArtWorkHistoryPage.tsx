@@ -1,55 +1,96 @@
-import { useState, useEffect } from 'react';
-import { useUser } from "@clerk/clerk-react";
-import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
-import Navbar from './NavBar';
-import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
-import { Calendar, ImageIcon } from 'lucide-react';
+"use client";
 
+import { useState, useEffect } from "react";
+import { Calendar as CalendarIcon, Clock, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { FilterDialog, FilterSettings } from "../ProductPage/FilterDialog";
+import axios from "axios";
+import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "./NavBar";
+import { genres as genreList } from "../components/ui/genreDropdown";
+import loader from "@/assets/loader.gif";
+import lightloader from "@/assets/lightloader.gif"
+import { useTheme } from "next-themes"; 
 interface ArtworkHistory {
   _id: string;
   title: string;
   genres: { id: string; style?: string }[];
   createdAt: string;
+  imageUrl: string | null;
 }
 
-const ArtworkHistoryPage = () => {
+interface TransformedArtwork {
+  id: string;
+  title: string;
+  date: string;
+  tags: string[];
+  thumbnail: string | null;
+}
+
+export default function ArtworkHistoryPage() {
   const { user } = useUser();
   const navigate = useNavigate();
-  const [artworkHistory, setArtworkHistory] = useState<ArtworkHistory[]>([]);
+  const [allArtworks, setAllArtworks] = useState<TransformedArtwork[]>([]);
+  const [filteredArtworks, setFilteredArtworks] = useState<TransformedArtwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingArtworkId, setLoadingArtworkId] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<FilterSettings>({
+    tags: [],
+    dateRange: null,
+    sortBy: "newest",
+  });
+  const { theme } = useTheme();
 
+
+  // Fetch artworks from backend
   useEffect(() => {
-    const fetchArtworkHistory = async () => {
+    const fetchArtworks = async () => {
       if (!user) return;
-
       try {
         setLoading(true);
-        const { data } = await axios.get<ArtworkHistory[]>(`http://localhost:8080/api/artworks/history`, {
-          params: { userId: user.id }
+        const { data } = await axios.get<ArtworkHistory[]>("http://localhost:8080/api/artworks/history", {
+          params: { userId: user.id },
         });
-        setArtworkHistory(data);
+        // Transform each artwork to include the expected fields
+        const transformed: TransformedArtwork[] = data.map((artwork) => ({
+          id: artwork._id,
+          title: artwork.title,
+          date: artwork.createdAt,
+          tags: artwork.genres.map((g) => g.id),
+          thumbnail: artwork.imageUrl,
+        }));
+        setAllArtworks(transformed);
+        setFilteredArtworks(transformed);
       } catch (error) {
-        console.error('Failed to fetch artwork history:', error);
-        // Optionally show error toast or message
+        console.error("Error fetching artworks:", error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchArtworkHistory();
+    fetchArtworks();
   }, [user]);
+
+  // Compute unique tags from all artworks
+  const allTags = Array.from(
+    new Set(allArtworks.flatMap((artwork) => artwork.tags))
+  );
 
   const handleViewArtwork = async (artworkId: string) => {
     if (!user) return;
-
     try {
+      setLoadingArtworkId(artworkId);
       const { data } = await axios.get(`http://localhost:8080/api/artworks/${artworkId}`, {
         params: { userId: user.id }
       });
-
       navigate("/results", {
         state: {
           analysis: data.analysis,
@@ -58,86 +99,135 @@ const ArtworkHistoryPage = () => {
       });
     } catch (error) {
       console.error('Failed to fetch artwork details:', error);
-      // Optionally show error toast or message
+      setLoadingArtworkId(null);
     }
   };
+
 
   if (loading) {
     return (
       <>
-        <Navbar />
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="animate-spin w-16 h-16 border-4 border-primary rounded-full border-t-transparent"></div>
-        </div>
-      </>
+     
+      
+      <div className="min-h-screen bg-black flex justify-center items-center">
+ {theme === "light" ? (
+        <img
+          src={lightloader}
+          alt="Loading Light"
+        
+        
+        />
+      ) : (
+       
+        <img
+          src={loader}
+          alt="Loading Dark"
+        />
+       
+      )}
+</div>
+</>
     );
   }
 
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <Card className="border-2 shadow-md">
-            <CardHeader>
-              <CardTitle>
-                <AnimatedGradientText className="text-3xl font-bold">
-                  Artwork History
-                </AnimatedGradientText>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {artworkHistory.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <ImageIcon className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                  <p>No artwork analyses found. Start creating your first story!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {artworkHistory.map((artwork) => (
-                    <div 
-                      key={artwork._id}
-                      className="border-2 rounded-lg p-4 hover:bg-muted/30 transition-colors group"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                            {artwork.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(artwork.createdAt).toLocaleDateString()}
-                          </div>
-                          {artwork.genres.length > 0 && (
-                            <div className="flex gap-2 mt-2">
-                              {artwork.genres.map((genre, index) => (
-                                <span 
-                                  key={index} 
-                                  className="text-xs bg-muted px-2 py-1 rounded"
-                                >
-                                  {genre.id} {genre.style ? `(${genre.style})` : ''}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleViewArtwork(artwork._id)}
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      {/* Ensure content is not hidden behind the navbar */}
+      <main className="container mx-auto mt-20 px-4 py-8 md:px-6 md:py-10">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-rose-500 dark:text-rose-400">
+              Artwork History
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              Browse your creative journey through time
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {activeFilters.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mr-2">
+                {activeFilters.tags.map((tag) => {
+                  const genre = genreList.find((g) => g.id === tag);
+                  return (
+                    <Badge key={tag} variant="outline" className="capitalize flex items-center gap-1">
+                      {genre && <genre.icon className={`h-4 w-4 ${genre.color}`} />}
+                      <span>{genre ? genre.name : tag}</span>
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+            <FilterDialog
+              allTags={allTags}
+              activeFilters={activeFilters}
+              setActiveFilters={setActiveFilters}
+              setFilteredArtworks={setFilteredArtworks}
+              artworks={allArtworks}
+            />
+          </div>
         </div>
-      </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredArtworks.map((artwork) => (
+            <Card
+              key={artwork.id}
+              className="group overflow-hidden transition-all hover:shadow-lg"
+            >
+              <div className="aspect-video relative transition-transform duration-700 group-hover:scale-105">
+                {artwork.thumbnail ? (
+                  <>
+                    <img
+                      src={artwork.thumbnail}
+                      alt={artwork.title}
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src="/placeholder.svg"
+                      alt="Placeholder"
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </>
+                )}
+              </div>
+              <CardHeader className="p-4">
+                <CardTitle className="line-clamp-1">{artwork.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <CalendarIcon className="mr-1 h-4 w-4" />
+                  {new Date(artwork.date).toLocaleDateString()}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {artwork.tags.map((tag) => {
+                    const genre = genreList.find((g) => g.id === tag);
+                    return (
+                      <Badge key={tag} variant="secondary" className="capitalize flex items-center gap-1">
+                        {genre && <genre.icon className={`h-4 w-4 ${genre.color}`} />}
+                        <span>{genre ? genre.name : tag}</span>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </CardContent>
+              <CardFooter className="p-4 pt-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => handleViewArtwork(artwork.id)}
+                >
+                  View Details
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </main>
     </>
   );
-};
-
-export default ArtworkHistoryPage;
+}

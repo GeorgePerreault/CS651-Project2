@@ -12,6 +12,8 @@ import { useUser } from "@clerk/clerk-react";
 import { useEffect } from "react";
 import AnalysisResults from "./ProductPage/AnalysisResults";
 import ArtworkHistoryPage from "./ProductPage/ArtWorkHistoryPage";
+import StorySlideshowPage from "./ProductPage/SlideShowPage";
+import CommunityPage from "./ProductPage/CommunityPage";
 function App() {
   const { user } = useUser();
 
@@ -40,9 +42,18 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route path="/results" element={<AnalysisResults />} />
-          <Route path="/history" element={<ArtworkHistoryPage />} />
-        
+          <Route path="/history" element={
+            <ProtectedRoute>
+              <ArtworkHistoryPage />
+            </ProtectedRoute>
+            
+            } />
+             <Route path="/slideshow" element={<StorySlideshowPage />} />
+             <Route path="/community" element={<CommunityPage />} />
+            
+
         </Routes>
       </Router>
     </ThemeProvider>

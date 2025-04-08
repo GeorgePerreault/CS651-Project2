@@ -14,7 +14,7 @@ export function ModeToggle() {
       pressed={theme === "dark"}
       onPressedChange={(pressed) => setTheme(pressed ? "dark" : "light")}
       aria-label="Toggle theme"
-      className="p-2.5 transition-all duration-300 ease-in-out"
+      className="border-0 p-2.5 transition-all duration-300 ease-in-out"
     >
       {theme === "dark" ? (
         <Moon className="h-5 w-5 transition-all" />

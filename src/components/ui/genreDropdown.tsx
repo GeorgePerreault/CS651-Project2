@@ -60,7 +60,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
-const genres = [
+export const genres = [
     {
       id: "fiction",
       name: "Fiction",
