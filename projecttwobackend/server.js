@@ -3,8 +3,18 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { Logging } = require("@google-cloud/logging")
 const { ImageAnnotatorClient } = require('@google-cloud/vision');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const logging = new Logging();
+const log = logging.log("gemini-api-requests");
+
+async function logRequest(dataToLog) {
+    const metadata = { resource: { type: "global" } };
+    const entry = log.entry(metadata, dataToLog);
+    await log.write(entry);
+}
 
 dotenv.config();
 const app = express();
@@ -170,6 +180,7 @@ app.post('/api/artworks', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
     const genres = req.body.genres ? JSON.parse(req.body.genres) : [];
+    logRequest({message: "Calling gemini with genres: " + genres.toString()})
     const [result] = await visionClient.annotateImage({
       image: { content: req.file.buffer.toString('base64') },
       features: [
@@ -436,6 +447,7 @@ IMPORTANT: Return ONLY a pure JSON object that can be parsed with JSON.parse() -
     res.status(201).json(responseData);
   } catch (error) {
     console.error('Analysis error:', error);
+    logRequest({error: "Error on analysis: " + error.message})
     res.status(500).json({
       error: 'Analysis failed',
       details: error.message
