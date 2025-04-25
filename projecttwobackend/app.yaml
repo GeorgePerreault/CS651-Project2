@@ -1,0 +1,7 @@
+runtime: nodejs20
+service: backend
+env_variables:
+  PORT: 8080
+  GOOGLE_APPLICATION_CREDENTIALS: /artworkanalysis-12de7c47125d.json
+  GEMINI_KEY: "AIzaSyDmS_t-Ah2jPgoClOQpE8ZS8O3BZWKzqCk"
+  MONGO_URI: mongodb+srv://yandamuri:itsmeVamsy123@artworkcluster.75i2h.mongodb.net/artworkDB?retryWrites=true&w=majority
