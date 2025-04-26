@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import Navbar from "@/components/ui/Navbar";
-import { BorderBeam } from "@/components/magicui/border-beam";
+// import { BorderBeam } from "@/components/magicui/border-beam";
 const About = () => {
   return (
     <>

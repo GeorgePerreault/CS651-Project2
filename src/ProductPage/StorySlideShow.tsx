@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   PlayCircle,
   PauseCircle,
@@ -12,17 +12,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
+  
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 
-const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
+const StoryCarousel = ({ analysis, imageUrls, onClose }: any) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const timerRef = useRef(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const SLIDE_DURATION = 8000; // 8 seconds per slide
 
   // Build slides from the story and images

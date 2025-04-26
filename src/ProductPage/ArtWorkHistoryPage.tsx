@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Clock, Upload } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,7 +42,7 @@ export default function ArtworkHistoryPage() {
   const [allArtworks, setAllArtworks] = useState<TransformedArtwork[]>([]);
   const [filteredArtworks, setFilteredArtworks] = useState<TransformedArtwork[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingArtworkId, setLoadingArtworkId] = useState<string | null>(null);
+  const [, setLoadingArtworkId] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<FilterSettings>({
     tags: [],
     dateRange: null,
@@ -57,7 +57,7 @@ export default function ArtworkHistoryPage() {
       if (!user) return;
       try {
         setLoading(true);
-        const { data } = await axios.get<ArtworkHistory[]>("http://localhost:8080/api/artworks/history", {
+        const { data } = await axios.get<ArtworkHistory[]>("https://backend-dot-visioncloudsite-457804.uw.r.appspot.com/api/artworks/history", {
           params: { userId: user.id },
         });
         // Transform each artwork to include the expected fields
@@ -88,7 +88,7 @@ export default function ArtworkHistoryPage() {
     if (!user) return;
     try {
       setLoadingArtworkId(artworkId);
-      const { data } = await axios.get(`http://localhost:8080/api/artworks/${artworkId}`, {
+      const { data } = await axios.get(`https://backend-dot-visioncloudsite-457804.uw.r.appspot.com/api/artworks/${artworkId}`, {
         params: { userId: user.id }
       });
       navigate("/results", {

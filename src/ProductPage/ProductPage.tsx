@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload, WandSparkles } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import axios from "axios";
 import Navbar from "./NavBar";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
@@ -56,7 +56,7 @@ const ProductPage = () => {
       }));
       formData.append("genres", JSON.stringify(genresData));
       const { data } = await axios.post(
-        "http://localhost:8080/api/artworks",
+        "https://backend-dot-visioncloudsite-457804.uw.r.appspot.com/api/artworks",
         formData
       );
       navigate("/results", {

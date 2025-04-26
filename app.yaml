@@ -1,0 +1,12 @@
+runtime: nodejs20
+
+handlers:
+  - url: /
+    static_files: dist/index.html
+    upload: dist/index.html
+
+  - url: /
+    static_dir: dist
+
+env_variables:
+  VITE_CLERK_PUBLISHABLE_KEY: pk_test_c2hhcmluZy1ib25lZmlzaC0zMS5jbGVyay5hY2NvdW50cy5kZXYk

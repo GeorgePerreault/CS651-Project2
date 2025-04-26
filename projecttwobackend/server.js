@@ -7,6 +7,17 @@ const { Logging } = require("@google-cloud/logging")
 const { ImageAnnotatorClient } = require('@google-cloud/vision');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+//Imports for logging/analytics
+//All the Google Analytics stuff will not work until we deploy the site
+//Uncomment all the Analytics stuff once we got the site deployed!
+// const axios = require("axios");
+
+// function trackEvent(eventName) {
+//   axios.post("https://www.google-analytics.com/mp/collect", {
+//     client_id: "your-client-id",
+//     events: [{ name: eventName }],
+//   });
+// }
 const logging = new Logging();
 const log = logging.log("gemini-api-requests");
 
@@ -23,7 +34,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
 const modelName = "gemini-2.0-flash-exp-image-generation";
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: '*',
   methods: ['POST', 'GET'],
   allowedHeaders: ['Content-Type']
 }));
@@ -104,6 +115,7 @@ function delay(ms) {
 async function generateStoryImage(promptText, section) {
   console.log(`generateStoryImage for ${section} - Prompt: ${promptText}`);
   try {
+    //trackEvent("Gemini API Call; Generate Story Image");
     const imageModel = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: {
@@ -159,6 +171,7 @@ async function generateStoryImageWithRetry(sectionText, section, maxAttempts = 3
 
 async function generateImageTwoStep(sectionText, section) {
   try {
+    // trackEvent("Gemini API Call; Generate Image Two Step");
     console.log(`Generating description for ${section} image`);
     const descriptionModel = genAI.getGenerativeModel({ model: modelName });
     const descriptionPrompt = `Create a detailed visual description for this scene in 3-4 sentences: ${sectionText}`;
@@ -178,6 +191,7 @@ async function generateImageTwoStep(sectionText, section) {
 // POST /api/artworks - Upload artwork and run analysis
 app.post('/api/artworks', upload.single('image'), async (req, res) => {
   try {
+    // trackEvent("Vision API Call; Image Analysis");
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
     const genres = req.body.genres ? JSON.parse(req.body.genres) : [];
     logRequest({message: "Calling gemini with genres: " + genres.toString()})
@@ -282,6 +296,7 @@ IMPORTANT: Return ONLY a pure JSON object that can be parsed with JSON.parse() -
 
     let analysisStory = {};
     try {
+      // trackEvent("Gemini API Call: Sending Prompt");
       console.log("Sending prompt to Gemini:", structuredPrompt);
       const model = genAI.getGenerativeModel({ model: modelName });
       const geminiResponse = await model.generateContent(structuredPrompt);

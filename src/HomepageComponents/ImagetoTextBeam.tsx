@@ -4,7 +4,7 @@ import type React from "react"
 import { forwardRef, useRef } from "react"
 import one from "../assets/1.jpg"
 import { cn } from "@/lib/utils"
-import { AnimatedBeam } from "../components/magicui/animated-beam"
+// import { AnimatedBeam } from "../components/magicui/animated-beam"
 
 const Circle = forwardRef<HTMLDivElement, { className?: string; children?: React.ReactNode }>(
   ({ className, children }, ref) => {

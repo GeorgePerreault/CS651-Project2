@@ -1,4 +1,4 @@
-import React from "react";
+//import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import StorySlideshow from "./StorySlideShow"
 import Navbar from "./NavBar";
@@ -15,7 +15,7 @@ const StorySlideshowPage = () => {
       <StorySlideshow
         analysis={analysis}
         imageUrls={imageUrls}
-        isOpen={true} // Always open on this page
+        //isOpen={true} // Always open on this page
         onClose={() => navigate("/")}
       />
     </>
