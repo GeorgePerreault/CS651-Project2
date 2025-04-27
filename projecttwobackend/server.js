@@ -31,9 +31,6 @@ async function logRequest(dataToLog) {
     await log.write(entry);
 }
 
-dotenv.config();
-
-
 const app = express();
 const visionClient = new ImageAnnotatorClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
