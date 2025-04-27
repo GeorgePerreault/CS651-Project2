@@ -10,6 +10,29 @@ const session = require('express-session');
 const axios = require('axios');
 const { ImageAnnotatorClient } = require('@google-cloud/vision');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { Logging } = require("@google-cloud/logging")
+
+//Imports for logging/analytics
+//All the Google Analytics stuff will not work until we deploy the site
+//Uncomment all the Analytics stuff once we got the site deployed!
+// const axios = require("axios");
+// function trackEvent(eventName) {
+//   axios.post("https://www.google-analytics.com/mp/collect", {
+//     client_id: "your-client-id",
+//     events: [{ name: eventName }],
+//   });
+// }
+
+const logging = new Logging();
+const log = logging.log("gemini-api-requests");
+async function logRequest(dataToLog) {
+    const metadata = { resource: { type: "global" } };
+    const entry = log.entry(metadata, dataToLog);
+    await log.write(entry);
+}
+
+dotenv.config();
+
 
 const app = express();
 const visionClient = new ImageAnnotatorClient();
