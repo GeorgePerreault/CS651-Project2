@@ -1,7 +1,7 @@
 import { BentoCard, BentoGrid } from "../components/magicui/bento-grid";
 import { motion } from "framer-motion";
 import { Cloud, ImageIcon, Database, Zap, Shield } from "lucide-react";
-import UserImg from "@/assets/UserImg.jpeg";
+
 
 interface Feature {
   Icon: React.ElementType;
@@ -18,9 +18,6 @@ const features: Feature[] = [
     description:
       "Automatically analyze user-uploaded photos from SocialNetwork platforms (e.g., Pinterest, Google Photos) using Google’s advanced Computer Vision tools.",
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
-    background: (
-      <img src={UserImg} className="absolute bg-contain opacity-100" />
-    ),
   },
   {
     Icon: Database,

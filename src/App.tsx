@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import AnalysisResults from "./ProductPage/AnalysisResults";
 import ArtworkHistoryPage from "./ProductPage/ArtWorkHistoryPage";
 import StorySlideshowPage from "./ProductPage/SlideShowPage";
-import CommunityPage from "./ProductPage/CommunityPage";
+import PinsPage from "./ProductPage/PinsPage";
 function App() {
   const { user } = useUser();
 
@@ -51,7 +51,7 @@ function App() {
             
             } />
              <Route path="/slideshow" element={<StorySlideshowPage />} />
-             <Route path="/community" element={<CommunityPage />} />
+             <Route path="/pins" element={<PinsPage />} />
             
 
         </Routes>

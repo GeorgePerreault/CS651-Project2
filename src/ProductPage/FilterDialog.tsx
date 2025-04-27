@@ -40,7 +40,9 @@ interface FilterDialogProps {
   allTags: string[];
   activeFilters: FilterSettings;
   setActiveFilters: (filters: FilterSettings) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFilteredArtworks: (artworks: any[]) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   artworks: any[];
 }
 

@@ -15,7 +15,6 @@ const StorySlideshowPage = () => {
       <StorySlideshow
         analysis={analysis}
         imageUrls={imageUrls}
-        //isOpen={true} // Always open on this page
         onClose={() => navigate("/")}
       />
     </>

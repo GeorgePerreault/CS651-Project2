@@ -3,7 +3,7 @@
 import { ModeToggle } from "../components/ui/mode-toggle";
 import { UserButton, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
-import { Upload, Clock, Users } from "lucide-react";
+import { Upload, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -11,10 +11,10 @@ const Navbar = () => {
 
   return (
     <nav className="bg-transparent bg-opacity-30 backdrop-blur-md fixed top-0 left-0 right-0 border-b flex items-center justify-between px-8 py-3 w-full z-50 shadow-sm">
-      {/* Left side: VisionCloud */}
+      {/* Left side: StoryForge */}
       <div className="flex items-center">
         <Link to="/" className="font-bold text-2xl">
-          VisionCloud
+        StoryForge
         </Link>
       </div>
       
@@ -28,12 +28,7 @@ const Navbar = () => {
             </Button>
           </Link>
         )}
-        <Link to="/community" className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <Users className="h-5 w-5" />
-            Community
-          </Button>
-        </Link>
+       
         <Link to="/product" className="flex items-center gap-2">
           <Button variant="ghost" size="sm" className="gap-2">
             <Upload className="h-5 w-5" />

@@ -4,14 +4,14 @@ import FeatureSection from "@/HomepageComponents/FeaturesSection";
 import Hero from "@/HomepageComponents/Hero";
 import Footer from "@/HomepageComponents/Footer";
 import { ScrollProgress } from "../components/magicui/scroll-progress"
-// import { WarpBackground } from "../components/magicui/warp-background";
+
 
 const HomePage = () => {
 
   return (
     
     <>
-     {/* <RetroGrid /> */}
+ 
      
    
       <ScrollProgress className="top-[64px]" />

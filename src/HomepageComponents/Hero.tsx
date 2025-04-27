@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-//import { useState } from "react";
 import { Link } from "react-router-dom";
 import { OrbitingCircles } from "../components/magicui/orbiting-circles";
 import { SparklesText } from "../components/magicui/sparkles-text";
@@ -11,6 +10,8 @@ import three from '../assets/6.jpg'
 import four from '../assets/4.jpg'
 import five from '../assets/5.jpg'
 import { motion } from "framer-motion"
+import arrowone from "../assets/arrowone.svg"
+
 
 const Hero = () => {
   const Icons = {
@@ -155,7 +156,7 @@ const Hero = () => {
 
   return (
     <>
-    <section className="relative w-full min-h-[120vh] flex flex-col items-center justify-center text-center overflow-hidden">
+    <section className="relative w-full min-h-[150vh] flex flex-col items-center justify-center text-center overflow-hidden">
       {/* Orbiting Circles Background */}
       <Spotlight />
 
@@ -242,19 +243,35 @@ const Hero = () => {
 
 
 <div className="relative z-20 w-full flex items-end justify-center px-8 translate-y-40 gap-10">
-          <motion.img
-            src={one}
-            alt="Image one"
-            className="w-80 h-[23rem] rounded-3xl object-cover"
-            initial={{ rotate: -6 }}
-            whileHover={{
-              scale: 1.05,
-              filter: "brightness(1.1)",
-              boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.3)"
-            }}
-            transition={{ duration: 0.3 }}
-           
-          />
+       {/* First image with arrow SVG coming out */}
+
+       <div className="flex flex-col items-center">
+      {/* Image container with SVG arrow */}
+      <div className="relative">
+        <motion.img
+          src={one}
+          alt="Image one"
+          className="w-80 h-[23rem] rounded-3xl object-cover"
+          initial={{ rotate: -6 }}
+          whileHover={{
+            scale: 1.05,
+            filter: "brightness(1.1)",
+            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.3)",
+          }}
+          transition={{ duration: 0.3 }}
+        />
+        {/* Absolutely positioned arrow SVG */}
+        <img
+          src={arrowone}
+          alt="Arrow coming out of image"
+          className="absolute -z-1 -bottom-19 left-1/2 transform -translate-x-1/2 w-auto h-[300px]"
+        />
+      </div>
+     
+    </div>
+
+
+          
           <motion.img
             src={two}
             alt="Image two"

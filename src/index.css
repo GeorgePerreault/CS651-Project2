@@ -80,8 +80,51 @@
 }
 
 
-/* .cl-avatarBox {
 
-} */
+.columns-masonry {
+  column-count: 1;
+  column-gap: 1rem;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .columns-masonry { column-count: 2; }
+}
+@media (min-width: 768px) {
+  .columns-masonry { column-count: 3; }
+}
+@media (min-width: 1024px) {
+  .columns-masonry { column-count: 4; }
+}
+
+.pin-card {
+  display: inline-block;       /* critical for columns layout */
+  width: 100%;                 /* fill the column width */
+  margin: 0 0 1rem;            /* bottom gutter */
+  padding: 0.5rem;             /* inner padding */
+  break-inside: avoid;         /* avoid splitting across columns */
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.pin-card img {
+  display: block;
+  width: 100%;
+  height: auto;                /* maintain aspect ratio */
+  max-width: 250px;            /* cap their width if you like */
+  margin: 0 auto 0.5rem;       /* center & space below */
+  border-radius: 4px;
+}
+
+.pin-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #333;
+}
+
 
 

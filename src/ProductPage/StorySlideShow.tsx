@@ -12,17 +12,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
 
-const StoryCarousel = ({ analysis, imageUrls, onClose }: any) => {
+const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef(null);
   const SLIDE_DURATION = 8000; // 8 seconds per slide
 
   // Build slides from the story and images
