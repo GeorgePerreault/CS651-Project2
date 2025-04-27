@@ -13,15 +13,18 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { Logging } = require("@google-cloud/logging")
 
 //Imports for logging/analytics
-//All the Google Analytics stuff will not work until we deploy the site
-//Uncomment all the Analytics stuff once we got the site deployed!
-// const axios = require("axios");
-// function trackEvent(eventName) {
-//   axios.post("https://www.google-analytics.com/mp/collect", {
-//     client_id: "your-client-id",
-//     events: [{ name: eventName }],
-//   });
-// }
+/*
+TODO: Add trackEvent("Insert event here"); 
+to places where gemini/vision api calls are made
+*/
+function trackEvent(eventName) {
+  const GAMeasurementID = process.env.GA4_MEASUREMENT_ID;
+  const GAAPIKey = process.env.GA4_API_KEY;
+  axios.post('https://www.google-analytics.com/mp/collect?measurement_id=${GAMeasurementID}&api_secret=${GAAPIKey}', {
+    client_id: "your-client-id",
+    events: [{ name: eventName }],
+  });
+}
 
 const logging = new Logging();
 const log = logging.log("gemini-api-requests");
@@ -156,6 +159,7 @@ async function fetchImageBuffer(url) {
 // === Shared Artwork Processing Function ===
 async function processArtwork({ buffer, mimetype, userId, title, genres }) {
   // 1) Vision API annotation
+  trackEvent("Vision API: process image");
   const [result] = await visionClient.annotateImage({
     image: { content: buffer.toString('base64') },
     features: [
@@ -281,6 +285,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
 
   // Generate images functions
   async function generateStoryImage(promptText, section) {
+    trackEvent("Gemini API: generate story image");
     const imageModel = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: { responseModalities: ['Text','Image'] }
@@ -313,6 +318,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   }
 
   async function generateImageTwoStep(sectionText, section) {
+    trackEvent("Gemini API: generate two step image");
     const descModel = genAI.getGenerativeModel({ model: modelName });
     const descResp = await descModel.generateContent(
       `Describe this scene in 3-4 sentences: ${sectionText}`

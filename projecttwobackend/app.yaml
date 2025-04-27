@@ -5,3 +5,5 @@ env_variables:
   GOOGLE_APPLICATION_CREDENTIALS: /artworkanalysis-12de7c47125d.json
   GEMINI_KEY: "AIzaSyDmS_t-Ah2jPgoClOQpE8ZS8O3BZWKzqCk"
   MONGO_URI: mongodb+srv://yandamuri:itsmeVamsy123@artworkcluster.75i2h.mongodb.net/artworkDB?retryWrites=true&w=majority
+  GA4_MEASUREMENT_ID: 'G-1VC8R83HTF'
+  GA4_API_KEY: 'yKcjkOegQnuuVBAJQzRZ2Q'
