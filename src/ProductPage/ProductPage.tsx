@@ -42,6 +42,14 @@ const ProductPage = () => {
   // };
 
   const startPinterestOAuth = () => {
+    ReactGA.event({
+      category: 'Product',
+      action: 'Image Analyzing'
+    });
+    ReactGA.event({
+      category: 'Product',
+      action: 'Used Pinterest'
+    });
     window.location.href = "http://localhost:8080/auth";
   };
 

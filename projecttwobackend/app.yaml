@@ -7,3 +7,7 @@ env_variables:
   MONGO_URI: mongodb+srv://yandamuri:itsmeVamsy123@artworkcluster.75i2h.mongodb.net/artworkDB?retryWrites=true&w=majority
   GA4_MEASUREMENT_ID: 'G-YY6K33P76Q'
   GA4_API_KEY: 'BILbgNTRQASDSBT1NFlXIw'
+  PINTEREST_APP_ID: '1518346'
+  PINTEREST_APP_SECRET: '8889ba46dc47e8f91853db7a72622c368477f8ab'
+  SESSION_SECRET: '4e64f0a9a91fe9d689acd65e6e125793cb4019f0cccf8812d7f7f8120c91878a'
+  REDIRECT_URI: 'http://localhost:8080/auth/pinterest/callback'
