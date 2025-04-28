@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/ui/Navbar";
 
+// Basically just an html file
 const Contact = () => {
   return (
     <>

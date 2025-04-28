@@ -5,7 +5,7 @@ import Hero from "@/HomepageComponents/Hero";
 import Footer from "@/HomepageComponents/Footer";
 import { ScrollProgress } from "../components/magicui/scroll-progress"
 
-
+// The page you see when first launching the website
 const HomePage = () => {
 
   return (

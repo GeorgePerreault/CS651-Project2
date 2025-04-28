@@ -4,6 +4,7 @@ import { Mail, ImageIcon, HeartIcon, BookOpenIcon } from "lucide-react";
 import Navbar from "@/components/ui/Navbar";
 import { motion } from "framer-motion";
 
+// Nothing fancy basically just an html file with some general semi-pretend stuff in it
 const About = () => {
   return (
       <>
