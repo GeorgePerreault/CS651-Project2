@@ -12,7 +12,7 @@ import five from '../assets/5.jpg'
 import { motion } from "framer-motion"
 import arrowone from "../assets/arrowone.svg"
 
-
+// This is responible for the flying icons on the homepage and giant background
 const Hero = () => {
   const Icons = {
     gitHub: () => (

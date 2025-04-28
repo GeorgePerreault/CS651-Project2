@@ -11,6 +11,7 @@ interface Feature {
   background?: React.ReactNode;
 }
 
+// These are the rectangles on the home page that have all the tech buzz words on them
 const features: Feature[] = [
   {
     Icon: ImageIcon,
