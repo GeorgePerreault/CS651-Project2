@@ -51,7 +51,7 @@ export default function ArtworkHistoryPage() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    axios.get<ArtworkHistory[]>("https://backend-dot-visioncloudsite-457804.uw.r.appspot.com/api/artworks/history", {
+    axios.get<ArtworkHistory[]>("http://localhost:8080/api/artworks/history", {
       params: { userId: user.id },
     })
       .then(({ data }) => {
@@ -74,7 +74,7 @@ export default function ArtworkHistoryPage() {
   const handleViewArtwork = (id: string) => {
     if (!user) return;
     setLoadingArtworkId(id);
-    axios.get(`https://backend-dot-visioncloudsite-457804.uw.r.appspot.com/api/artworks/${id}`, {
+    axios.get(`http://localhost:8080/api/artworks/${id}`, {
       params: { userId: user.id }
     })
       .then(({ data }) => {
