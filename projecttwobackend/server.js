@@ -1,25 +1,35 @@
-
 // Load environment variables from .env file
 require('dotenv').config();
 
 const express = require('express');
-const mongoose = require('mongoose');
 const multer = require('multer');
 const cors = require('cors');
 const session = require('express-session');
 const axios = require('axios');
 const { ImageAnnotatorClient } = require('@google-cloud/vision');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const admin = require('firebase-admin');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getStorage } = require('firebase-admin/storage');
+
+const app = express();
+const visionClient = new ImageAnnotatorClient();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
+const modelName = 'gemini-2.0-flash-exp-image-generation';
 const { Logging } = require("@google-cloud/logging")
 
+
+
 //Imports for logging/analytics
-
 const { v4: uuidv4 } = require('uuid');
-const clientId = uuidv4();
 
+const clientId = uuidv4();
 function trackEvent(eventName) {
+
   const GAMeasurementID = process.env.GA4_MEASUREMENT_ID;
+
   const GAAPIKey = process.env.GA4_API_KEY;
+
   try {
     const response = axios.post('https://www.google-analytics.com/mp/collect?measurement_id=G-YY6K33P76Q&api_secret=BILbgNTRQASDSBT1NFlXIw', {
       client_id: clientId,
@@ -29,28 +39,48 @@ function trackEvent(eventName) {
   } catch (error) {
     console.error('Error sending event:', error.response?.data || error.message);
   }
-  
+
 }
+
+
 
 const logging = new Logging();
+
 const log = logging.log("gemini-api-requests");
+
 async function logRequest(dataToLog) {
+
     const metadata = { resource: { type: "global" } };
+
     const entry = log.entry(metadata, dataToLog);
+
     await log.write(entry);
+
+}
+// === Firebase Setup ===
+let serviceAccount;
+try {
+  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT;
+  serviceAccount = require(serviceAccountPath);
+} catch (error) {
+  console.error('Error loading Firebase service account:', error);
+  process.exit(1);
 }
 
-const app = express();
-const visionClient = new ImageAnnotatorClient();
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY);
-const modelName = "gemini-2.0-flash-exp-image-generation";
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+});
+
+const db = getFirestore();
+const bucket = getStorage().bucket();
 
 // === Middleware ===
 app.use(cors({
   origin: 'http://localhost:5173',
   methods: ['POST', 'GET'],
   allowedHeaders: ['Content-Type'],
-  credentials: true 
+  credentials: true
 }));
 app.use(express.json());
 app.use(session({
@@ -63,29 +93,21 @@ app.use(session({
   }
 }));
 
-// === MongoDB Connection ===
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
-
-// === Artwork Schema & Model (shared) ===
-const artworkSchema = new mongoose.Schema({
-  userId:     { type: String, required: true },
-  title:      { type: String, required: true },
-  image:      {
-    data: Buffer,
-    contentType: String
-  },
-  genres:     [{ id: String, style: String }],
-  analysis:   mongoose.Schema.Types.Mixed,
-  storyImages: mongoose.Schema.Types.Mixed,
-  shared:     { type: Boolean, default: false },
-  createdAt:  { type: Date, default: Date.now }
+// === Proxy external images to avoid CORS issues ===
+app.get('/api/proxy-image', async (req, res) => {
+  try {
+    const imageUrl = req.query.url;
+    if (!imageUrl) {
+      return res.status(400).send('Missing image URL');
+    }
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    res.setHeader('Content-Type', response.headers['content-type']);
+    res.send(response.data);
+  } catch (error) {
+    console.error('Image proxy error:', error);
+    res.status(500).send('Failed to proxy image');
+  }
 });
-const Artwork = mongoose.model('Artwork', artworkSchema);
 
 // === Pinterest OAuth + Basic API ===
 const { PINTEREST_APP_ID, PINTEREST_APP_SECRET, REDIRECT_URI } = process.env;
@@ -118,8 +140,7 @@ app.get('/auth/pinterest/callback', async (req, res) => {
       }),
       {
         headers: {
-          'Authorization': 'Basic ' +
-            Buffer.from(`${PINTEREST_APP_ID}:${PINTEREST_APP_SECRET}`).toString('base64'),
+          'Authorization': 'Basic ' + Buffer.from(`${PINTEREST_APP_ID}:${PINTEREST_APP_SECRET}`).toString('base64'),
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }
@@ -165,7 +186,6 @@ async function fetchImageBuffer(url) {
 // === Shared Artwork Processing Function ===
 async function processArtwork({ buffer, mimetype, userId, title, genres }) {
   // 1) Vision API annotation
-  //trackEvent("Vision API: process image");
   const [result] = await visionClient.annotateImage({
     image: { content: buffer.toString('base64') },
     features: [
@@ -268,8 +288,7 @@ async function processArtwork({ buffer, mimetype, userId, title, genres }) {
     : 'general fiction';
 
   // 3) Ask Gemini to generate the story JSON
-  const structuredPrompt =
-`Generate a creative ${genreDescription} story based on an image analysis.
+  const structuredPrompt = `Generate a creative ${genreDescription} story based on an image analysis.
 Return ONLY a valid JSON object with the following structure and NO additional text:
 
 {
@@ -289,12 +308,11 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // Generate images functions
+  // Image generation helpers
   async function generateStoryImage(promptText, section) {
-    //trackEvent("Gemini API: generate story image");
     const imageModel = genAI.getGenerativeModel({
       model: modelName,
-      generationConfig: { responseModalities: ['Text','Image'] }
+      generationConfig: { responseModalities: ['Text', 'Image'] }
     });
     const resp = await imageModel.generateContent(promptText);
     const parts = resp.response.candidates[0].content.parts;
@@ -305,7 +323,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     return null;
   }
 
-  async function generateStoryImageWithRetry(sectionText, section, maxAttempts=3) {
+  async function generateStoryImageWithRetry(sectionText, section, maxAttempts = 3) {
     const variations = [
       `Generate a vivid illustration for: ${sectionText}. 2560×1440.`,
       `Create an image showing: ${sectionText}. 2560×1440.`,
@@ -324,7 +342,6 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   }
 
   async function generateImageTwoStep(sectionText, section) {
-    //trackEvent("Gemini API: generate two step image");
     const descModel = genAI.getGenerativeModel({ model: modelName });
     const descResp = await descModel.generateContent(
       `Describe this scene in 3-4 sentences: ${sectionText}`
@@ -342,8 +359,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     const match = text.match(/\{[\s\S]*\}/);
     analysisStory = match ? JSON.parse(match[0]) : {};
   } catch (e) {
-    console.error("Story generation error:", e);
-    // fallback
+    console.error('Story generation error:', e);
     analysisStory = {
       introduction: `A world awash in ${colorDescriptions} came to life.`,
       rising_action: `Conflict emerged when ${objectNames} appeared.`,
@@ -352,10 +368,11 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
       resolution: `In the end, colors shifted from ${colorTransition}, bringing calm.`
     };
   }
+
   analysis.story = analysisStory;
 
-  // 5) Create & save images for each section
-  const sections = ['introduction','rising_action','twist','climax','resolution'];
+  // 4) Generate images for each section
+  const sections = ['introduction', 'rising_action', 'twist', 'climax', 'resolution'];
   const generatedImages = {};
 
   for (const section of sections) {
@@ -366,43 +383,72 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     }
     await delay(1000);
     if (section === 'resolution') {
-      generatedImages[section] = await generateImageTwoStep(secText, section)
+      generatedImages[section] =
+        await generateImageTwoStep(secText, section)
         || await generateStoryImageWithRetry(secText, section, 4);
     } else {
-      generatedImages[section] = await generateStoryImageWithRetry(secText, section, 3);
+      generatedImages[section] =
+        await generateStoryImageWithRetry(secText, section, 3);
     }
   }
 
-  // Final fallback for resolution if needed
-  if (!generatedImages.resolution && analysisStory.resolution) {
-    await delay(2000);
-    generatedImages.resolution = await generateStoryImage(
-      `I need an image for the ending: ${analysisStory.resolution}. Return only image.`,
-      'resolution'
-    );
+  // 5) Upload each generated image to Firebase Storage & collect URLs
+  const storyImageRefs = {};
+  const artworkId = db.collection('artworks').doc().id;
+  const artworkRef = db.collection('artworks').doc(artworkId);
+
+  for (const section of sections) {
+    const data = generatedImages[section];
+    if (!data) continue;
+
+    // Convert base64 to Buffer if necessary
+    const imageBuffer = Buffer.isBuffer(data)
+      ? data
+      : Buffer.from(data, 'base64');
+
+    const filename = `story-images/${artworkId}_${section}.png`;
+    const file = bucket.file(filename);
+
+    await file.save(imageBuffer, {
+      contentType: 'image/png',
+      metadata: { contentType: 'image/png' }
+    });
+    await file.makePublic();
+
+    storyImageRefs[section] = file.publicUrl();
   }
 
-  // 6) Save artwork document
-  const newArtwork = new Artwork({
+  // 6) Upload the **original** image to Storage & get its URL
+  const ext = mimetype.split('/')[1];       // e.g. "jpeg" or "png"
+  const originalPath = `artworks/${artworkId}_original.${ext}`;
+  const originalFile = bucket.file(originalPath);
+  await originalFile.save(buffer, {
+    contentType: mimetype,
+    metadata: { contentType: mimetype }
+  });
+  await originalFile.makePublic();
+  const originalUrl = originalFile.publicUrl();
+
+  // 7) Save artwork document to Firestore (only URLs, no raw binary)
+  await artworkRef.set({
     userId,
     title,
-    image: { data: buffer, contentType: mimetype },
     genres,
     analysis,
-    storyImages: generatedImages
-  });
-  await newArtwork.save();
+    storyImageRefs,
+    originalImageUrl: originalUrl,
+    shared: false,
+    createdAt: FieldValue.serverTimestamp()
+  }, { merge: true });
 
-  // 7) Build response payload
-  const imageUrls = {};
-  sections.forEach(sec => {
-    const data = generatedImages[sec];
-    imageUrls[sec] = data ? `data:image/png;base64,${data}` : null;
-  });
-
+  // 8) Return the payload
   return {
+    id: artworkId,
     analysis: { ...analysis, story: analysisStory },
-    imageUrls
+    imageUrls: {
+      original: originalUrl,
+      ...storyImageRefs
+    }
   };
 }
 
@@ -418,7 +464,7 @@ app.post('/api/artworks/import', async (req, res) => {
     const result = await processArtwork({ buffer, mimetype, userId, title, genres });
     res.status(201).json(result);
   } catch (err) {
-    console.error("Import-pin error:", err);
+    console.error('Import-pin error:', err);
     res.status(500).json({ error: 'Import failed', details: err.message });
   }
 });
@@ -437,7 +483,7 @@ const upload = multer({
 // === POST /api/artworks (file upload) ===
 app.post('/api/artworks', upload.single('image'), async (req, res) => {
   try {
-    const buffer   = req.file.buffer;
+    const buffer = req.file.buffer;
     const mimetype = req.file.mimetype;
     const { userId, title } = req.body;
     const genres = req.body.genres ? JSON.parse(req.body.genres) : [];
@@ -456,18 +502,28 @@ app.get('/api/artworks/history', async (req, res) => {
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
-    const history = await Artwork.find({ userId })
-      .sort({ createdAt: -1 })
-      .select('title genres createdAt image');
-    const formatted = history.map(a => ({
-      _id:       a._id,
-      title:     a.title,
-      genres:    a.genres,
-      createdAt: a.createdAt,
-      imageUrl:  a.image?.data
-        ? `data:${a.image.contentType};base64,${a.image.data.toString('base64')}`
-        : null
-    }));
+
+    const snapshot = await db.collection('artworks')
+      .where('userId', '==', userId)
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+      return res.json([]);
+    }
+
+    const formatted = [];
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      formatted.push({
+        _id: doc.id,
+        title: data.title,
+        genres: data.genres,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        imageUrl: data.originalImageUrl
+      });
+    }
+
     res.json(formatted);
   } catch (error) {
     console.error('Artwork history error:', error);
@@ -480,16 +536,22 @@ app.get('/api/artworks/:id', async (req, res) => {
   try {
     const artworkId = req.params.id;
     const userId = req.query.userId;
-    const artwork = await Artwork.findOne({ _id: artworkId, userId });
-    if (!artwork) {
+
+    const doc = await db.collection('artworks').doc(artworkId).get();
+    if (!doc.exists) {
       return res.status(404).json({ error: 'Artwork not found' });
     }
-    const imageUrls = {};
-    Object.entries(artwork.storyImages || {}).forEach(([sec, data]) => {
-      imageUrls[sec] = data
-        ? `data:image/png;base64,${data.toString('base64')}`
-        : null;
-    });
+
+    const artwork = doc.data();
+    if (artwork.userId !== userId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const imageUrls = {
+      original: artwork.originalImageUrl,
+      ...artwork.storyImageRefs
+    };
+
     res.json({ analysis: artwork.analysis, storyImages: imageUrls });
   } catch (error) {
     console.error('Artwork details error:', error);
