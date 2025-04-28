@@ -50,7 +50,10 @@ const ProductPage = () => {
     if (!title || !file || !user) return;
     setLoading(true);
     try {
-      ReactGA.send("Artwork Analysis");
+      ReactGA.event({
+        category: 'Product',
+        action: 'Image Analyzing'
+      });
       const formData = new FormData();
       formData.append("title", title);
       formData.append("image", file);
