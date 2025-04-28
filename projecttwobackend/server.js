@@ -23,6 +23,7 @@ const { Logging } = require("@google-cloud/logging")
 //Imports for logging/analytics
 const { v4: uuidv4 } = require('uuid');
 
+//Function to call for tacking google analytics
 const clientId = uuidv4();
 function trackEvent(eventName) {
 
@@ -44,10 +45,12 @@ function trackEvent(eventName) {
 
 
 
+//Setup and Function call for google logging
 const logging = new Logging();
 
 const log = logging.log("gemini-api-requests");
 
+// Usage: logRequest({ message: "string to log"})
 async function logRequest(dataToLog) {
 
     const metadata = { resource: { type: "global" } };
@@ -57,6 +60,7 @@ async function logRequest(dataToLog) {
     await log.write(entry);
 
 }
+
 // === Firebase Setup ===
 let serviceAccount;
 try {
@@ -112,6 +116,7 @@ app.get('/api/proxy-image', async (req, res) => {
 // === Pinterest OAuth + Basic API ===
 const { PINTEREST_APP_ID, PINTEREST_APP_SECRET, REDIRECT_URI } = process.env;
 
+// Handles pintrest auth
 app.get('/auth', (req, res) => {
   const state = Math.random().toString(36).substring(2);
   req.session.state = state;
@@ -146,6 +151,7 @@ app.get('/auth/pinterest/callback', async (req, res) => {
       }
     );
     req.session.accessToken = tokenRes.data.access_token;
+    // Where to go after auth
     res.redirect('http://localhost:5173/pins');
   } catch (err) {
     console.error('Token exchange error:', err.response?.data || err);
@@ -153,8 +159,10 @@ app.get('/auth/pinterest/callback', async (req, res) => {
   }
 });
 
+// Displays users pintrest pins
 app.get('/api/pins', async (req, res) => {
   const token = req.session.accessToken;
+  // If pintrest auth went wrong for some reason
   if (!token) {
     return res.status(401).send('Not authenticated');
   }
@@ -202,6 +210,7 @@ async function processArtwork({ buffer, mimetype, userId, title, genres }) {
   });
 
   // 2) Build analysis object
+  // All below is feeding the vision api information to gemini
   const analysis = {
     genres,
     labels: result.labelAnnotations?.map(l => ({
@@ -288,6 +297,7 @@ async function processArtwork({ buffer, mimetype, userId, title, genres }) {
     : 'general fiction';
 
   // 3) Ask Gemini to generate the story JSON
+  // We went with trying to force a 5 act structure to have a mostly-consistent 5 images
   const structuredPrompt = `Generate a creative ${genreDescription} story based on an image analysis.
 Return ONLY a valid JSON object with the following structure and NO additional text:
 
@@ -323,6 +333,8 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     return null;
   }
 
+  // Gemini is not guaranteed to give you an image so just in case it doesn't 
+  // we have a function to try really hard to get it to give us an image
   async function generateStoryImageWithRetry(sectionText, section, maxAttempts = 3) {
     const variations = [
       `Generate a vivid illustration for: ${sectionText}. 2560×1440.`,
@@ -341,6 +353,9 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     return img;
   }
 
+  // A way to try and get a better image by first having the AI
+  // create a description of it's story, then telling it to generate
+  // an image from that
   async function generateImageTwoStep(sectionText, section) {
     const descModel = genAI.getGenerativeModel({ model: modelName });
     const descResp = await descModel.generateContent(
@@ -356,10 +371,13 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     const model = genAI.getGenerativeModel({ model: modelName });
     const geminiResp = await model.generateContent(structuredPrompt);
     const text = geminiResp.response.text();
+    // Matches text inside of curly braces {like this text} to extract the story information 
     const match = text.match(/\{[\s\S]*\}/);
     analysisStory = match ? JSON.parse(match[0]) : {};
   } catch (e) {
+    logRequest({message: 'Story generation error:', e});
     console.error('Story generation error:', e);
+    // Backup text to display that hopefully doesn't have to show up
     analysisStory = {
       introduction: `A world awash in ${colorDescriptions} came to life.`,
       rising_action: `Conflict emerged when ${objectNames} appeared.`,
@@ -375,6 +393,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   const sections = ['introduction', 'rising_action', 'twist', 'climax', 'resolution'];
   const generatedImages = {};
 
+  // Generate 1 image per section
   for (const section of sections) {
     const secText = analysisStory[section];
     if (!secText) {
@@ -397,6 +416,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   const artworkId = db.collection('artworks').doc().id;
   const artworkRef = db.collection('artworks').doc(artworkId);
 
+  // Save each image individually 
   for (const section of sections) {
     const data = generatedImages[section];
     if (!data) continue;
@@ -496,6 +516,7 @@ app.post('/api/artworks', upload.single('image'), async (req, res) => {
 });
 
 // === GET /api/artworks/history ===
+// Returns user's history of artworks
 app.get('/api/artworks/history', async (req, res) => {
   try {
     const userId = req.query.userId;
@@ -503,6 +524,7 @@ app.get('/api/artworks/history', async (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
+    // No real security done to check that requested user's artworks is logged in
     const snapshot = await db.collection('artworks')
       .where('userId', '==', userId)
       .orderBy('createdAt', 'desc')
@@ -532,6 +554,7 @@ app.get('/api/artworks/history', async (req, res) => {
 });
 
 // === GET /api/artworks/:id ===
+// For viewing a single artwork
 app.get('/api/artworks/:id', async (req, res) => {
   try {
     const artworkId = req.params.id;
@@ -543,6 +566,7 @@ app.get('/api/artworks/:id', async (req, res) => {
     }
 
     const artwork = doc.data();
+    // Extremely simple and not secure check
     if (artwork.userId !== userId) {
       return res.status(403).json({ error: 'Access denied' });
     }
