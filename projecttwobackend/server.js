@@ -13,16 +13,16 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { Logging } = require("@google-cloud/logging")
 
 //Imports for logging/analytics
-/*
-TODO: Add trackEvent("Insert event here"); 
-to places where gemini/vision api calls are made
-*/
+
+const { v4: uuidv4 } = require('uuid');
+const clientId = uuidv4();
+
 function trackEvent(eventName) {
   const GAMeasurementID = process.env.GA4_MEASUREMENT_ID;
   const GAAPIKey = process.env.GA4_API_KEY;
   try {
-    const response = axios.post('https://www.google-analytics.com/mp/collect?measurement_id=${GAMeasurementID}&api_secret=${GAAPIKey}', {
-      client_id: "your-client-id",
+    const response = axios.post('https://www.google-analytics.com/mp/collect?measurement_id=G-YY6K33P76Q&api_secret=BILbgNTRQASDSBT1NFlXIw', {
+      client_id: clientId,
       events: [{ name: eventName }],
     });
     console.log('Event sent:', response.data);
@@ -165,7 +165,7 @@ async function fetchImageBuffer(url) {
 // === Shared Artwork Processing Function ===
 async function processArtwork({ buffer, mimetype, userId, title, genres }) {
   // 1) Vision API annotation
-  trackEvent("Vision API: process image");
+  //trackEvent("Vision API: process image");
   const [result] = await visionClient.annotateImage({
     image: { content: buffer.toString('base64') },
     features: [
@@ -291,7 +291,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
 
   // Generate images functions
   async function generateStoryImage(promptText, section) {
-    trackEvent("Gemini API: generate story image");
+    //trackEvent("Gemini API: generate story image");
     const imageModel = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: { responseModalities: ['Text','Image'] }
@@ -324,7 +324,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   }
 
   async function generateImageTwoStep(sectionText, section) {
-    trackEvent("Gemini API: generate two step image");
+    //trackEvent("Gemini API: generate two step image");
     const descModel = genAI.getGenerativeModel({ model: modelName });
     const descResp = await descModel.generateContent(
       `Describe this scene in 3-4 sentences: ${sectionText}`

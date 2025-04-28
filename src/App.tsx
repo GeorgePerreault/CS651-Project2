@@ -16,8 +16,7 @@ import StorySlideshowPage from "./ProductPage/SlideShowPage";
 import PinsPage from "./ProductPage/PinsPage";
 import ReactGA from "react-ga4";
 
-ReactGA.initialize("G-YY6K33P76Q");
-ReactGA.send("pageview");
+
 function App() {
   const { user } = useUser();
 
@@ -26,6 +25,8 @@ function App() {
       console.log("User ID:", user.id);
       console.log("User Name:", user.fullName || `${user.firstName} ${user.lastName}`);
     }
+    ReactGA.initialize("G-YY6K33P76Q");
+    ReactGA.send("pageview");
   }, [user]); // Runs whenever the user object changes
 
   return (

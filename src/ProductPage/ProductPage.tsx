@@ -12,6 +12,7 @@ import { GenreDropdown, SelectedGenre } from "@/components/ui/genreDropdown";
 import Navbar from "./NavBar";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import axios from "axios";
+import ReactGA from "react-ga4";
 
 const ProductPage = () => {
   const { user } = useUser();
@@ -49,6 +50,7 @@ const ProductPage = () => {
     if (!title || !file || !user) return;
     setLoading(true);
     try {
+      ReactGA.send("Artwork Analysis");
       const formData = new FormData();
       formData.append("title", title);
       formData.append("image", file);
