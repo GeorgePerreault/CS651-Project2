@@ -52,13 +52,9 @@ const log = logging.log("gemini-api-requests");
 
 // Usage: logRequest({ message: "string to log"})
 async function logRequest(dataToLog) {
-
     const metadata = { resource: { type: "global" } };
-
     const entry = log.entry(metadata, dataToLog);
-
     await log.write(entry);
-
 }
 
 // === Firebase Setup ===
@@ -194,6 +190,8 @@ async function fetchImageBuffer(url) {
 // === Shared Artwork Processing Function ===
 async function processArtwork({ buffer, mimetype, userId, title, genres }) {
   // 1) Vision API annotation
+    logRequest({message: `sending off to vision api with title: ${title} and genres: ${genres.toString()}`});
+
   const [result] = await visionClient.annotateImage({
     image: { content: buffer.toString('base64') },
     features: [
@@ -320,6 +318,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
 
   // Image generation helpers
   async function generateStoryImage(promptText, section) {
+    logRequest({message: "generating image with prompt: ", promptText});
     const imageModel = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: { responseModalities: ['Text', 'Image'] }
@@ -336,6 +335,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   // Gemini is not guaranteed to give you an image so just in case it doesn't 
   // we have a function to try really hard to get it to give us an image
   async function generateStoryImageWithRetry(sectionText, section, maxAttempts = 3) {
+    logRequest({message: "generating (retry) image with prompt: ", sectionText});
     const variations = [
       `Generate a vivid illustration for: ${sectionText}. 2560×1440.`,
       `Create an image showing: ${sectionText}. 2560×1440.`,
@@ -357,6 +357,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   // create a description of it's story, then telling it to generate
   // an image from that
   async function generateImageTwoStep(sectionText, section) {
+    logRequest({message: "generating image (two step) with prompt: ", sectionText});
     const descModel = genAI.getGenerativeModel({ model: modelName });
     const descResp = await descModel.generateContent(
       `Describe this scene in 3-4 sentences: ${sectionText}`
@@ -368,6 +369,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
 
   // Attempt to generate story JSON
   try {
+    logRequest({message: "attemping to generate story json with prompt: ", structuredPrompt});
     const model = genAI.getGenerativeModel({ model: modelName });
     const geminiResp = await model.generateContent(structuredPrompt);
     const text = geminiResp.response.text();
@@ -375,7 +377,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
     const match = text.match(/\{[\s\S]*\}/);
     analysisStory = match ? JSON.parse(match[0]) : {};
   } catch (e) {
-    logRequest({message: 'Story generation error:', e});
+    logRequest({error: e.message});
     console.error('Story generation error:', e);
     // Backup text to display that hopefully doesn't have to show up
     analysisStory = {
@@ -450,6 +452,7 @@ Use dramatic language and incorporate these emotional tones: ${emotionalTones}`;
   const originalUrl = originalFile.publicUrl();
 
   // 7) Save artwork document to Firestore (only URLs, no raw binary)
+  logRequest({message: "saving to firestore", title});
   await artworkRef.set({
     userId,
     title,
