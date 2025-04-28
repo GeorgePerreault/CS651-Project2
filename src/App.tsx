@@ -14,6 +14,10 @@ import AnalysisResults from "./ProductPage/AnalysisResults";
 import ArtworkHistoryPage from "./ProductPage/ArtWorkHistoryPage";
 import StorySlideshowPage from "./ProductPage/SlideShowPage";
 import PinsPage from "./ProductPage/PinsPage";
+import ReactGA from "react-ga4";
+
+ReactGA.initialize("G-YY6K33P76Q");
+ReactGA.send("pageview");
 function App() {
   const { user } = useUser();
 

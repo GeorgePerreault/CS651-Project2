@@ -20,10 +20,16 @@ to places where gemini/vision api calls are made
 function trackEvent(eventName) {
   const GAMeasurementID = process.env.GA4_MEASUREMENT_ID;
   const GAAPIKey = process.env.GA4_API_KEY;
-  axios.post('https://www.google-analytics.com/mp/collect?measurement_id=${GAMeasurementID}&api_secret=${GAAPIKey}', {
-    client_id: "your-client-id",
-    events: [{ name: eventName }],
-  });
+  try {
+    const response = axios.post('https://www.google-analytics.com/mp/collect?measurement_id=${GAMeasurementID}&api_secret=${GAAPIKey}', {
+      client_id: "your-client-id",
+      events: [{ name: eventName }],
+    });
+    console.log('Event sent:', response.data);
+  } catch (error) {
+    console.error('Error sending event:', error.response?.data || error.message);
+  }
+  
 }
 
 const logging = new Logging();
