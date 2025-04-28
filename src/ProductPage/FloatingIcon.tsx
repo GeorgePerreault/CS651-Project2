@@ -39,6 +39,7 @@ const FloatingIcon: React.FC<FloatingIconProps> = ({
     });
   }, []);
 
+  // File is not actually used anywhere in the final build
   return (
     <motion.div
       className="absolute"

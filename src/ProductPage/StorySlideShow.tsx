@@ -17,6 +17,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
+// The actual meat of the story slide show
 const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -101,6 +102,7 @@ const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
     setIsPlaying(!isPlaying);
   };
 
+  // Basic error check
   if (slides.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center text-gray-300">
@@ -112,6 +114,7 @@ const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
     );
   }
 
+  // Large block of text but essentially just the layout of the carousel
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="relative w-full max-w-5xl rounded-lg shadow-xl overflow-hidden">

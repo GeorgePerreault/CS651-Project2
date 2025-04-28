@@ -38,6 +38,7 @@ type User = {
   website_url: string | null;
 };
 
+// Our page for displaying a user's pintrest pins for selection before importing
 export default function PinsPage() {
   const { user } = useUser();
   const navigate = useNavigate();

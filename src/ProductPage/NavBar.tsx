@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Upload, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// The top bar of the website
 const Navbar = () => {
   const { user } = useUser();
 

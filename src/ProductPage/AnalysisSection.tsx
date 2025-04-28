@@ -7,6 +7,7 @@ interface AnalysisSectionProps {
   children?: ReactNode;
 }
 
+// This is the grid to the right of the story displaying the vision api results
 const AnalysisSection = ({ title, items, children }: AnalysisSectionProps) => {
   return (
     <div className="space-y-3 mb-6">

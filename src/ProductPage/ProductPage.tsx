@@ -14,6 +14,8 @@ import { AnimatedGradientText } from "@/components/magicui/animated-gradient-tex
 import axios from "axios";
 import ReactGA from "react-ga4";
 
+// The true main page of the application
+// The page with the upload image and pintrest import button
 const ProductPage = () => {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -53,6 +55,7 @@ const ProductPage = () => {
     window.location.href = "http://localhost:8080/auth";
   };
 
+  // What to do when you actually submit your image
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !file || !user) return;
@@ -62,6 +65,7 @@ const ProductPage = () => {
         category: 'Product',
         action: 'Image Analyzing'
       });
+      // Grab data and send off to api
       const formData = new FormData();
       formData.append("title", title);
       formData.append("image", file);
@@ -90,6 +94,7 @@ const ProductPage = () => {
     }
   };
 
+  // Gigantic blob of text but this just returns the html layout of the page
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />

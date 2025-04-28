@@ -60,6 +60,7 @@ export default function AnalysisResults() {
     console.log("AnalysisResults - ImageUrls:", imageUrls);
   }, [state, analysis, imageUrls]);
 
+  // It doesn't say exactly what percentage case maps to so we just guessed 
   const mapLikelihoodToConfidence = (likelihood: Likelihood) => {
     switch (likelihood) {
       case Likelihood.VeryLikely:
@@ -77,6 +78,7 @@ export default function AnalysisResults() {
     }
   };
 
+  // Map the emotions to emoji
   const emotionMapping = [
     {
       name: "Joy",

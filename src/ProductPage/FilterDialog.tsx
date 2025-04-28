@@ -46,6 +46,7 @@ interface FilterDialogProps {
   artworks: any[];
 }
 
+// These are filters for when viewing your artwork history
 export function FilterDialog({
   allTags,
   activeFilters,

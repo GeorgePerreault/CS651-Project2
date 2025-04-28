@@ -35,6 +35,7 @@ interface TransformedArtwork {
   thumbnail: string | null;
 }
 
+// Page for displaying the user's previously generated artworks
 export default function ArtworkHistoryPage() {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export default function ArtworkHistoryPage() {
 
   const allTags = Array.from(new Set(allArtworks.flatMap(a => a.tags)));
 
+  // What to do if the user clicks on an artwork
   const handleViewArtwork = (id: string) => {
     if (!user) return;
     setLoadingArtworkId(id);
@@ -86,6 +88,7 @@ export default function ArtworkHistoryPage() {
       .finally(() => setLoadingArtworkId(null));
   };
 
+  // Show a nice animation if we're still waiting on the history
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader/></div>;
   }
