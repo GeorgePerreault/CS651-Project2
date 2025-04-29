@@ -78,7 +78,7 @@ const bucket = getStorage().bucket();
 // === Middleware ===
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['POST', 'GET'],
+  methods: ['POST', 'GET','DELETE'],
   allowedHeaders: ['Content-Type'],
   credentials: true
 }));
@@ -585,6 +585,89 @@ app.get('/api/artworks/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch artwork details', details: error.message });
   }
 });
+
+
+
+
+// === DELETE /api/artworks/:id ===
+app.delete('/api/artworks/:id', async (req, res) => {
+  try {
+    const artworkId = req.params.id;
+    const userId = req.query.userId;
+
+    if (!artworkId || !userId) {
+      return res.status(400).json({ error: 'Missing artworkId or userId' });
+    }
+
+    const docRef = db.collection('artworks').doc(artworkId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
+    const artwork = doc.data();
+    if (artwork.userId !== userId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Step 1: Delete Firebase Storage picture
+    const filesToDelete = [];
+
+    // Delete the original picture
+    if (artwork.originalImageUrl) {
+      const originalPath = extractStoragePathFromUrl(artwork.originalImageUrl);
+      if (originalPath) filesToDelete.push(originalPath);
+    }
+
+    // Delete some images from each story
+    if (artwork.storyImageRefs) {
+      Object.values(artwork.storyImageRefs).forEach(url => {
+        const path = extractStoragePathFromUrl(url);
+        if (path) filesToDelete.push(path);
+      });
+    }
+
+    // Delete Firebase Storage doc
+    for (const filePath of filesToDelete) {
+      const file = bucket.file(filePath);
+      await file.delete().catch(err => {
+        console.error(`Failed to delete storage file ${filePath}:`, err.message);
+      });
+    }
+
+
+    await docRef.delete();
+
+    res.status(200).json({ message: 'Artwork and associated files deleted successfully' });
+
+  } catch (error) {
+    console.error('Delete artwork error:', error);
+    res.status(500).json({ error: 'Failed to delete artwork', details: error.message });
+  }
+});
+
+// === Helper function: get the Storage URL
+function extractStoragePathFromUrl(publicUrl) {
+  try {
+    const storageDomain = `https://storage.googleapis.com/${process.env.FIREBASE_STORAGE_BUCKET}/`;
+    if (publicUrl.startsWith(storageDomain)) {
+      const encodedPath = publicUrl.replace(storageDomain, '');
+      const decodedPath = decodeURIComponent(encodedPath);
+      return decodedPath;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+
+
+
+
+
+
 
 // === Start Server ===
 const PORT = process.env.PORT || 8080;
