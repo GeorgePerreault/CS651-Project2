@@ -1,6 +1,6 @@
 import { BentoCard, BentoGrid } from "../components/magicui/bento-grid";
 import { motion } from "framer-motion";
-import { Cloud, ImageIcon, Database, Zap, Shield } from "lucide-react";
+import { PlayCircle, Camera, Eye, MessageSquare, ImageIcon } from "lucide-react";
 
 
 interface Feature {
@@ -11,41 +11,40 @@ interface Feature {
   background?: React.ReactNode;
 }
 
-// These are the rectangles on the home page that have all the tech buzz words on them
 const features: Feature[] = [
   {
-    Icon: ImageIcon,
-    name: "User Photo Analysis",
+    Icon: Camera,
+    name: "Photo Upload & Import",
     description:
-      "Automatically analyze user-uploaded photos from SocialNetwork platforms (e.g., Pinterest, Google Photos) using Google’s advanced Computer Vision tools.",
+      "Upload images from your device or import directly from Pinterest and Google Photos in one click.",
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
   },
   {
-    Icon: Database,
-    name: "Cloud Storage Integration",
+    Icon: Eye,
+    name: "AI Image Analysis",
     description:
-      "Securely store the analysis results in Google Cloud Firestore or Datastore, ensuring scalable and reliable data management.",
+      "Leverage Google Vision API to extract labels, faces, text, colors, and more from every photo.",
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
   },
   {
-    Icon: Zap,
-    name: "Seamless Single-Page Experience",
+    Icon: MessageSquare,
+    name: "Story Generation",
     description:
-      "Enjoy a smooth, interactive single-page application (SPA) that loads quickly and provides real-time analysis results.",
+      "Use Gemini’s generative API to turn those image insights into a rich, coherent narrative.",
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
   },
   {
-    Icon: Cloud,
-    name: "Google Cloud Deployment",
+    Icon:  ImageIcon,
+    name: "AI-Generated Illustrations",
     description:
-      "Hosted on Google Cloud Run or Google App Engine (GAE), ensuring high availability, performance, and automatic scaling.",
+      "Automatically create bespoke illustrations for each story segment using the Gemini image model.",
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
   },
   {
-    Icon: Shield,
-    name: "Secure and Reliable",
+    Icon: PlayCircle,
+    name: "Interactive Slideshow",
     description:
-      "Data storage and processing handled securely with Google Cloud, ensuring privacy and compliance with industry standards",
+      "Seamlessly combine text and images into a dynamic slideshow with built-in narration controls.",
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
   },
 ];
