@@ -116,7 +116,7 @@ const StoryCarousel = ({ analysis, imageUrls, onClose }) => {
 
   // Large block of text but essentially just the layout of the carousel
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen mt-10 flex items-center justify-center p-4">
       <div className="relative w-full max-w-5xl rounded-lg shadow-xl overflow-hidden">
         {/* Close Button */}
         <Button
